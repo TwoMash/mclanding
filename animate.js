@@ -1,4 +1,5 @@
 window.addEventListener('DOMContentLoaded', function() {
+  ///Проврекпрлаопр
   document.body.style.opacity = 1;
   }); 
   
@@ -21,6 +22,8 @@ window.addEventListener('DOMContentLoaded', function() {
       // Если текстовый цвет для "white" не определен, используем, например, черный. Можно адаптировать по вашим нуждам.
       textColor = '#000000';
     }
+
+
   
     const triggerConfig = {
       trigger: block,
