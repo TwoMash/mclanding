@@ -304,7 +304,7 @@ var isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 var elements = document.querySelectorAll(".ecosystem_category");
 
 //Accordeon image
-if (window.innerWidth < 440) {
+if (window.innerWidth < 520) {
   var elements = document.querySelectorAll(".ecosystem_category");
 
   elements.forEach(function (element) {
@@ -324,7 +324,7 @@ function handleAccordionToggle(event) {
 
 //Scale image
 elements.forEach(function (element) {
-  if (window.innerWidth >= 441) {
+  if (window.innerWidth >= 521) {
     // проверка ширины экрана
     if (isTouchDevice) {
       element.addEventListener("click", handleClick);
@@ -425,7 +425,7 @@ ecosystemCategory.forEach((element) => {
     },
     scrollTrigger: {
       trigger: element,
-      start: window.matchMedia("(max-height: 400px)").matches
+      start: window.matchMedia("(max-height: 800px)").matches
         ? "top bottom+=150"
         : "top bottom-=150",
       immediateRender: true,
