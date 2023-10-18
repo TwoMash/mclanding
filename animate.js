@@ -4,50 +4,29 @@ window.addEventListener("DOMContentLoaded", function () {
   document.body.style.opacity = 1;
 });
 
-/*-------------------------------------------------  Header Color Control  ------------------------------------------------------------------------ */
+/*-------------------------------------------------  Header Control  ------------------------------------------------------------------------ */
+function handleScroll() {
+  const header = document.querySelector('[data-scroll="header"]');
+  const logo = document.querySelector('[data-scroll="logo"]');
 
-const header = document.querySelector('[data-scroll="header"]');
-let colorHistory = [];
+  gsap.set(logo, { y: "-200px" });
 
-document.querySelectorAll("[data-block]").forEach((block) => {
-  const blockType = block.getAttribute("data-block");
-  let backgroundColor, textColor;
-  if (blockType.includes("light")) {
-    backgroundColor = "#E5E5E8";
-    textColor = "#000000";
-  } else if (blockType.includes("dark")) {
-    backgroundColor = "#000000";
-    textColor = "#ffffff";
-  } else if (blockType.includes("white")) {
-    backgroundColor = "#ffffff";
-    textColor = "#000000";
-  }
-
-  //Trgger for header color
-  const triggerConfig = {
-    trigger: block,
-    start: blockType.includes("hero-banner") ? "top -30%" : "top 20%",
-    end: "bottom 20%",
+  ScrollTrigger.create({
+    trigger: "document.body",
+    start: "top top-=300",
+    end: "top top-=300",
     onEnter: () => {
-      colorHistory.push({
-        backgroundColor: header.style.backgroundColor,
-        textColor: header.style.color,
-      });
-
-      header.style.backgroundColor = backgroundColor;
-      header.style.color = textColor;
+      gsap.to(header, { y: "-200px", duration: 0.5 });
+      gsap.to(logo, { y: "0px", duration: 0.5 });
     },
     onLeaveBack: () => {
-      if (colorHistory.length > 0) {
-        const lastColor = colorHistory.pop();
-        header.style.backgroundColor = lastColor.backgroundColor;
-        header.style.color = lastColor.textColor;
-      }
+      gsap.to(header, { y: "0px", duration: 0.5 });
+      gsap.to(logo, { y: "-200px", duration: 0.5 });
     },
-  };
+  });
+}
 
-  ScrollTrigger.create(triggerConfig);
-});
+window.addEventListener("load", handleScroll);
 
 /*-------------------------------------------------  Text Animation library  ------------------------------------------------------------------------ */
 
@@ -292,34 +271,133 @@ tl.fromTo(
 
 let opportunityCards = document.querySelectorAll("[opportunity-card]");
 opportunityCards.forEach((opportunityCard) => {
-  ScrollTrigger.create({
-    trigger: opportunityCard,
-    start: "center center",
-    endTrigger: whiteBlock,
-    end: "bottom bottom",
-    pin: true,
-    pinSpacing: false,
-  });
+  let style = window.getComputedStyle(opportunityCard);
+  let marginTop = parseInt(style.marginTop);
+
+  if (window.matchMedia("(min-height: 450px)").matches) {
+    ScrollTrigger.create({
+      trigger: opportunityCard,
+      start: `top-=${marginTop} 10%`,
+      endTrigger: whiteBlock,
+      end: `bottom bottom`,
+      pin: true,
+      pinSpacing: false,
+    });
+  } else {
+    ScrollTrigger.create({
+      trigger: opportunityCard,
+      start: `top-=${marginTop} -90%`,
+      endTrigger: whiteBlock,
+      end: `bottom bottom`,
+      pin: true,
+      pinSpacing: false,
+    });
+  }
 });
 
 /*-------------------------------------------------  Ecosystem table ------------------------------------------------------------------------ */
 
-let elements = document.querySelectorAll("[data-line]");
-let elementsState = new Map();
+let ecosystemCategory = document.querySelectorAll(".ecosystem_category");
+let ecosystemCategoryState = new Map();
 
-let sortedElements = Array.from(elements).sort((a, b) => {
-  return (
-    parseInt(a.getAttribute("data-line")) -
-    parseInt(b.getAttribute("data-line"))
-  );
+var isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+var elements = document.querySelectorAll(".ecosystem_category");
+
+//Accordeon image
+if (window.innerWidth < 440) {
+  var elements = document.querySelectorAll(".ecosystem_category");
+
+  elements.forEach(function (element) {
+    element.addEventListener("click", handleAccordionToggle);
+  });
+}
+
+function handleAccordionToggle(event) {
+  var element = event.currentTarget;
+
+  if (element.classList.contains("expanded")) {
+    element.classList.remove("expanded");
+  } else {
+    element.classList.add("expanded");
+  }
+}
+
+//Scale image
+elements.forEach(function (element) {
+  if (window.innerWidth >= 441) {
+    // проверка ширины экрана
+    if (isTouchDevice) {
+      element.addEventListener("click", handleClick);
+    } else {
+      element.addEventListener("mouseenter", handleMouseEnter);
+      element.addEventListener("mouseleave", handleMouseLeave);
+    }
+  }
 });
 
-let activeElement = null;
+function handleClick(event) {
+  var element = event.currentTarget;
+  toggleFade(element);
+}
 
-sortedElements.forEach((element) => {
-  let tapCount = 0;
-  let initialTouchX, initialTouchY;
+function handleMouseEnter(event) {
+  var element = event.currentTarget;
+  toggleFade(element);
+}
 
+function handleMouseLeave(event) {
+  resetFade();
+}
+
+function toggleFade(element) {
+  var isAlreadyHighlighted = element.classList.contains("highlight");
+  resetFade();
+  if (isAlreadyHighlighted) {
+  } else {
+    setTransformOrigin(element);
+    element.classList.add("highlight");
+    var otherElements = document.querySelectorAll(
+      ".ecosystem_category:not(.highlight)"
+    );
+    otherElements.forEach(function (el) {
+      el.classList.add("fade");
+    });
+  }
+}
+
+function resetFade() {
+  var fadedElements = document.querySelectorAll(".fade");
+  var highlightedElements = document.querySelectorAll(".highlight");
+  fadedElements.forEach(function (el) {
+    el.classList.remove("fade");
+  });
+  highlightedElements.forEach(function (el) {
+    el.classList.remove("highlight");
+    el.style.transformOrigin = "";
+  });
+}
+
+function setTransformOrigin(element) {
+  var rect = element.getBoundingClientRect();
+  var transformOrigin = "";
+
+  if (rect.top + rect.height / 2 < window.innerHeight / 2) {
+    transformOrigin += "top ";
+  } else {
+    transformOrigin += "bottom ";
+  }
+
+  if (rect.left + rect.width / 2 < window.innerWidth / 2) {
+    transformOrigin += "left";
+  } else {
+    transformOrigin += "right";
+  }
+
+  element.style.transformOrigin = transformOrigin;
+}
+
+// Animation for each element as it comes into view
+ecosystemCategory.forEach((element) => {
   if (element.getAttribute("data-line") === "0") {
     return;
   }
@@ -331,302 +409,28 @@ sortedElements.forEach((element) => {
     y: y,
     x: x,
     opacity: 0,
-    scale: 1.25,
-    rotateX: x / 3,
-    rotateY: y / 3,
+    scale: 1.5,
+    rotateX: x / 4,
+    rotateY: y / 4,
     ease: "power2.Out",
     duration: 0.8,
     onComplete: function () {
-      elementsState.set(element, "visible");
+      ecosystemCategoryState.set(element, "visible");
+      element.style.transform = "";
+      element.style.opacity = "";
+      element.style.transitionProperty = "all";
+      element.style.transitionDuration = "400ms";
+      element.style.transitionTimingFunction =
+        "cubic-bezier(.645, .045, .355, 1)";
     },
     scrollTrigger: {
       trigger: element,
-      start: window.matchMedia("(max-width: 480px)").matches
-        ? "top 150%"
-        : "top bottom",
+      start: window.matchMedia("(max-height: 400px)").matches
+        ? "top bottom+=150"
+        : "top bottom-=150",
       immediateRender: true,
     },
   });
-
-  function resetElement() {
-    gsap.to(element, {
-      x: 0,
-      y: 0,
-      scale: 1,
-      zIndex: 1,
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.Out",
-    });
-    let ecosystemElement = element.querySelector(".ecosystem-content");
-    if (ecosystemElement) {
-      ecosystemElement.style.display = "none";
-    }
-    tapCount = 0;
-  }
-
-  element.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-
-    if (window.matchMedia("(max-width: 480px)").matches) {
-      let ecosystemElement = element.querySelector(".ecosystem-content");
-
-      if (activeElement === element) {
-        ecosystemElement.style.display = "none";
-        activeElement = null;
-      } else {
-        ecosystemElement.style.display = "block";
-        activeElement = element;
-      }
-    } else {
-      let rect = element.getBoundingClientRect();
-      let x = e.touches[0].clientX - rect.left - rect.width / 2;
-      let y = e.touches[0].clientY - rect.top - rect.height / 2;
-
-      gsap.to(element, {
-        x: x * 0.2,
-        y: y * 0.2,
-        scale: 1.4,
-        zIndex: 500,
-        duration: 0.3,
-        opacity: 1,
-        ease: "power2.Out",
-      });
-    }
-
-    if (!window.matchMedia("(max-width: 480px)").matches) {
-      sortedElements.forEach((otherElement) => {
-        if (
-          otherElement !== element &&
-          elementsState.get(otherElement) === "visible"
-        ) {
-          gsap.to(otherElement, {
-            opacity: 0,
-            duration: 0.4,
-          });
-        }
-      });
-    }
-  });
-
-  element.addEventListener("touchmove", (e) => {
-    if (!window.matchMedia("(max-width: 480px)").matches) {
-      let rect = element.getBoundingClientRect();
-      let x = e.touches[0].clientX - rect.left - rect.width / 2;
-      let y = e.touches[0].clientY - rect.top - rect.height / 2;
-
-      gsap.to(element, {
-        x: x * 0.6,
-        y: y * 0.6,
-        scale: 2,
-        zIndex: 500,
-        duration: 0.8,
-        opacity: 1,
-        ease: "power2.Out",
-      });
-    }
-  });
-
-  element.addEventListener("touchend", (e) => {
-    if (!window.matchMedia("(max-width: 480px)").matches) {
-      gsap.to(element, {
-        x: 0,
-        y: 0,
-        scale: 1,
-        zIndex: 1,
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.Out",
-      });
-
-      sortedElements.forEach((otherElement) => {
-        if (elementsState.get(otherElement) === "visible") {
-          gsap.to(otherElement, {
-            opacity: 1,
-            duration: 0.4,
-          });
-        }
-      });
-    }
-  });
-
-  element.addEventListener("mousemove", (e) => {
-    if (window.matchMedia("(max-width: 480px)").matches) {
-      let ecosystemElement = element.querySelector(".ecosystem-content");
-      if (ecosystemElement) {
-        ecosystemElement.style.display = "block";
-      }
-    }
-    let rect = element.getBoundingClientRect();
-    let x = e.clientX - rect.left - rect.width / 2;
-    let y = e.clientY - rect.top - rect.height / 2;
-
-    gsap.to(element, {
-      x: x * 0.2,
-      y: y * 0.2,
-      scale: 1.4,
-      zIndex: 500,
-      duration: 0.3,
-      opacity: 1,
-      ease: "power2.Out",
-    });
-
-    sortedElements.forEach((otherElement) => {
-      if (
-        otherElement !== element &&
-        elementsState.get(otherElement) === "visible"
-      ) {
-        gsap.to(otherElement, {
-          opacity: 0,
-          duration: 0.4,
-        });
-      }
-    });
-  });
-
-  element.addEventListener("mouseleave", () => {
-    if (window.matchMedia("(max-width: 480px)").matches) {
-      let ecosystemElement = element.querySelector(".ecosystem-content");
-      if (ecosystemElement) {
-        ecosystemElement.style.display = "none";
-      }
-    }
-    gsap.to(element, {
-      x: 0,
-      y: 0,
-      scale: 1,
-      zIndex: 1,
-      opacity: 1,
-      duration: 0.3,
-      ease: "power2.Out",
-    });
-
-    sortedElements.forEach((otherElement) => {
-      if (elementsState.get(otherElement) === "visible") {
-        gsap.to(otherElement, {
-          opacity: 1,
-          duration: 0.4,
-        });
-      }
-    });
-  });
-});
-
-/*-------------------------------------------------  Chart JS ------------------------------------------------------------------------ */
-
-var currentSegmentIndex = 0;
-
-function initChart() {
-  var ctx = document.getElementById("myPieChart").getContext("2d");
-  var dataValues = [61, 22, 4, 3, 6, 4];
-  var total = dataValues.reduce((acc, val) => acc + val, 0);
-
-  myPieChart = new Chart(ctx, {
-    type: "pie",
-    data: {
-      labels: ["Fintech", "SaaS", "E-commerce", "HRTech", "EdTech", "Other"],
-      datasets: [
-        {
-          data: dataValues,
-          backgroundColor: [
-            "#050505",
-            "#0A0A0A",
-            "#0F0F0F",
-            "#121212",
-            "#1A1A1A",
-            "#1F1F1F",
-          ],
-          borderColor: "#535353",
-          borderWidth: 0.5,
-          hoverBackgroundColor: [
-            "#EC0A24",
-            "#cc444b",
-            "#da5552",
-            "#df7373",
-            "#e39695",
-            "#e4b1ab",
-          ],
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: true,
-          position: "bottom",
-          labels: {
-            padding: 32,
-            generateLabels: function (chart) {
-              const original =
-                Chart.overrides.pie.plugins.legend.labels.generateLabels;
-              const labels = original.call(this, chart);
-              labels.forEach((label, i) => {
-                const value = dataValues[i];
-                const percentage = ((value / total) * 100).toFixed(2);
-                label.text = `${label.text} (${percentage}%)`;
-              });
-              return labels;
-            },
-            onClick: null,
-          },
-        },
-        tooltip: {
-          displayColors: false,
-          callbacks: {
-            label: function (context) {
-              var value = context.parsed;
-              return value + "%";
-            },
-          },
-        },
-      },
-      animation: {
-        animateRotate: true,
-        animateScale: false,
-        duration: 1500,
-        easing: "easeInOutCubic",
-      },
-    },
-  });
-
-  activateSegment(currentSegmentIndex);
-  setInterval(changeActiveSegment, 3000);
-}
-
-function activateSegment(idx) {
-  myPieChart.setActiveElements([]);
-  myPieChart.tooltip.setActiveElements([]);
-
-  myPieChart.setActiveElements([
-    {
-      datasetIndex: 0,
-      index: idx,
-    },
-  ]);
-  myPieChart.tooltip.setActiveElements(
-    [
-      {
-        datasetIndex: 0,
-        index: idx,
-      },
-    ],
-    false
-  );
-
-  myPieChart.update();
-}
-
-function changeActiveSegment() {
-  currentSegmentIndex = (currentSegmentIndex + 1) % 6;
-  activateSegment(currentSegmentIndex);
-}
-
-ScrollTrigger.create({
-  trigger: "#myPieChart",
-  start: "top 85%",
-  onEnter: function () {
-    initChart();
-  },
 });
 
 /*-------------------------------------------------  Footer sticky ------------------------------------------------------------------------ */
