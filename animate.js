@@ -426,7 +426,7 @@ ecosystemCategory.forEach((element) => {
     scrollTrigger: {
       trigger: element,
       start: window.matchMedia("(max-height: 800px)").matches
-        ? "top bottom+=150"
+        ? "top bottom+=30"
         : "top bottom-=150",
       immediateRender: true,
     },
